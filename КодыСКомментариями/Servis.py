@@ -7,11 +7,13 @@ import time
 import requests
 import datetime
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__)  # Создание экземпляра приложения Flask
+CORS(app)  # Разрешение CORS для всего приложения
 
+# Декоратор для обработки GET-запроса по пути '/form'
 @app.route('/form', methods=['GET'])
 def form():
+    # Возвращает HTML-форму для ввода URL
     return '''
     <!DOCTYPE html>
 <html>
@@ -66,26 +68,36 @@ document.getElementById('myForm').addEventListener('submit', function(e) {
 </html>
     '''
 
+# Функция для генерации короткого URL
 def generate_short_url():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
+# Декоратор для обработки POST-запроса по корневому пути '/'
 @app.route('/', methods=['POST'])
 def shorten_url():
+    # Получение данных из запроса и декодирование
     url = request.data.decode()
+    # Создание сокета для подключения к серверу
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
+            # Попытка подключения к серверу
             s.connect((SERVER_IP, SERVER_PORT))
         except Exception as e:
+            # В случае ошибки возвращается сообщение об ошибке
             return f'Не удалось подключиться к серверу: {str(e)}', 500
+        # Отправка запроса на получение существующего короткого URL
         s.sendall(f'--file urls.data --query HGET short_urls {url}'.encode())
+        # Получение ответа от сервера
         existing_url = s.recv(1024).decode()
         existing_url = existing_url.replace('\n', '').replace('\r', '')
+        # Обработка ошибки или возврат существующего короткого URL
         if existing_url == "Error.":
             s.close()
             return 'Error.', 501
         if existing_url != "-> False":
             s.close()
             return f'{request.url_root}SU/{existing_url}'
+        # Генерация нового короткого URL, если существующего нет
         while True:
             short_url = generate_short_url()
             s.sendall(f'--file urls.data --query HGET urls {short_url}'.encode())
@@ -106,20 +118,28 @@ def shorten_url():
                 s.close()
                 return f'{request.url_root}SU/{short_url}'
 
+# Декоратор для обработки GET-запроса по пути '/SU/<short_url>'
 @app.route('/SU/<short_url>', methods=['GET'])
 def redirect_url(short_url):
+    # Создание сокета для подключения к серверу
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
+            # Попытка подключения к серверу
             s.connect((SERVER_IP, SERVER_PORT))
         except Exception as e:
-            return f'Не удалось подключиться к серверу: {str(e)}', 500
+            # В случае ошибки возвращается сообщение об ошибке
+            return f'Не удалось подключиться к серверу: {str(e)}', 505
+        # Отправка запроса на получение оригинального URL
         s.sendall(f'--file urls.data --query HGET urls {short_url}'.encode())
+        # Получение ответа от сервера
         url = s.recv(1024).decode()
         url = url.replace('\n', '').replace('\r', '')
+        # Обработка ошибки или перенаправление на оригинальный URL
         if url == "Error.":
             s.close()
             return 'Error.', 500
         s.close()
+    # Отправка данных для JSON
     response = requests.post(f'http://{SERVER_IP_PORT}/', json={
         'ip': request.headers.get('X-Forwarded-For', request.remote_addr),
         'url': f'{url}_({short_url})',
