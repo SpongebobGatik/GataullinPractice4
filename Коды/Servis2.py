@@ -152,270 +152,305 @@ class Statistics:
         self.load()
         report = []
         id = 1
-        if (dimensions[0]=='URL' and dimensions[1]=='SourceIP'):
-            for url, stats in self.statistics1.items():
-                url_dict = {}
-                for stat in stats:
-                    ip, timestamp = stat
-                    if ip not in url_dict:
-                        url_dict[ip] = {'count': 1, 'timestamps': {timestamp: 1}}
-                    else:
-                        if timestamp not in url_dict[ip]['timestamps']:
-                            url_dict[ip]['timestamps'][timestamp] = 1
+        if len(dimensions) == 1:
+            dimension = dimensions[0]
+            if dimension == 'URL':
+                for url, stats in self.statistics1.items():
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': url,
+                        'SourceIP': None,
+                        'TimeInterval': None,
+                        'Count': len(stats)
+                    })
+                    id += 1
+            elif dimension == 'SourceIP':
+                for ip, stats in self.statistics3.items():
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': None,
+                        'SourceIP': ip,
+                        'TimeInterval': None,
+                        'Count': len(stats)
+                    })
+                    id += 1
+            elif dimension == 'TimeInterval':
+                for timestamp, stats in self.statistics5.items():
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': None,
+                        'SourceIP': None,
+                        'TimeInterval': str(timestamp),
+                        'Count': len(stats)
+                    })
+        else:
+            if (dimensions[0]=='URL' and dimensions[1]=='SourceIP'):
+                for url, stats in self.statistics1.items():
+                    url_dict = {}
+                    for stat in stats:
+                        ip, timestamp = stat
+                        if ip not in url_dict:
+                            url_dict[ip] = {'count': 1, 'timestamps': {timestamp: 1}}
                         else:
-                            url_dict[ip]['timestamps'][timestamp] += 1
-                total_count = sum(sum(data['timestamps'].values()) for data in url_dict.values())
-                report.append({
-                    'Id': id,
-                    'Pid': None,
-                    'URL': url,
-                    'SourceIP': None,
-                    'TimeInterval': None,
-                    'Count': total_count
-                })
-                id += 1
-                for ip, data in url_dict.items():
-                    if 'SourceIP' in dimensions:
-                        report.append({
-                            'Id': id,
-                            'Pid': 1,
-                            'URL': None,
-                            'SourceIP': ip,
-                            'TimeInterval': None,
-                            'Count': sum(data['timestamps'].values())
-                        })
-                        id += 1
-                    for timestamp, timestamp_count in data['timestamps'].items():
-                        if 'TimeInterval' in dimensions:
-                            report.append({
-                                'Id': id,
-                                'Pid': 2,
-                                'URL': None,
-                                'SourceIP': None,
-                                'TimeInterval': str(timestamp),
-                                'Count': timestamp_count
-                            })
-                            id += 1
-        if (dimensions[0]=='URL' and dimensions[1]=='TimeInterval'):
-            for url, stats in self.statistics2.items():
-                url_dict = {}
-                for stat in stats:
-                    timestamp, ip = stat
-                    if timestamp not in url_dict:
-                        url_dict[timestamp] = {'count': 1, 'ips': {ip: 1}}
-                    else:
-                        if ip not in url_dict[timestamp]['ips']:
-                            url_dict[timestamp]['ips'][ip] = 1
-                        else:
-                            url_dict[timestamp]['ips'][ip] += 1
-                total_count = sum(sum(data['ips'].values()) for data in url_dict.values())
-                report.append({
-                    'Id': id,
-                    'Pid': None,
-                    'URL': url,
-                    'SourceIP': None,
-                    'TimeInterval': None,
-                    'Count': total_count
-                })
-                id += 1
-                for timestamp, data in url_dict.items():
-                    if 'TimeInterval' in dimensions:
-                        report.append({
-                            'Id': id,
-                            'Pid': 1,
-                            'URL': None,
-                            'SourceIP': None,
-                            'TimeInterval': str(timestamp),
-                            'Count': sum(data['ips'].values())
-                        })
-                        id += 1
-                    for ip, ip_count in data['ips'].items():
+                            if timestamp not in url_dict[ip]['timestamps']:
+                                url_dict[ip]['timestamps'][timestamp] = 1
+                            else:
+                                url_dict[ip]['timestamps'][timestamp] += 1
+                    total_count = sum(sum(data['timestamps'].values()) for data in url_dict.values())
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': url,
+                        'SourceIP': None,
+                        'TimeInterval': None,
+                        'Count': total_count
+                    })
+                    id += 1
+                    for ip, data in url_dict.items():
                         if 'SourceIP' in dimensions:
                             report.append({
                                 'Id': id,
-                                'Pid': 2,
+                                'Pid': 1,
                                 'URL': None,
                                 'SourceIP': ip,
                                 'TimeInterval': None,
-                                'Count': ip_count
+                                'Count': sum(data['timestamps'].values())
                             })
                             id += 1
-        if (dimensions[0]=='SourceIP' and dimensions[1]=='URL'):
-            for ip, stats in self.statistics3.items():
-                ip_dict = {}
-                for stat in stats:
-                    url, timestamp = stat
-                    if url not in ip_dict:
-                        ip_dict[url] = {'count': 1, 'timestamps': {timestamp: 1}}
-                    else:
-                        if timestamp not in ip_dict[url]['timestamps']:
-                            ip_dict[url]['timestamps'][timestamp] = 1
+                        for timestamp, timestamp_count in data['timestamps'].items():
+                            if 'TimeInterval' in dimensions:
+                                report.append({
+                                    'Id': id,
+                                    'Pid': 2,
+                                    'URL': None,
+                                    'SourceIP': None,
+                                    'TimeInterval': str(timestamp),
+                                    'Count': timestamp_count
+                                })
+                                id += 1
+            if (dimensions[0]=='URL' and dimensions[1]=='TimeInterval'):
+                for url, stats in self.statistics2.items():
+                    url_dict = {}
+                    for stat in stats:
+                        timestamp, ip = stat
+                        if timestamp not in url_dict:
+                            url_dict[timestamp] = {'count': 1, 'ips': {ip: 1}}
                         else:
-                            ip_dict[url]['timestamps'][timestamp] += 1
-                total_count = sum(sum(data['timestamps'].values()) for data in ip_dict.values())
-                report.append({
-                    'Id': id,
-                    'Pid': None,
-                    'URL': None,
-                    'SourceIP': ip,
-                    'TimeInterval': None,
-                    'Count': total_count
-                })
-                id += 1
-                for url, data in ip_dict.items():
-                    if 'URL' in dimensions:
-                        report.append({
-                            'Id': id,
-                            'Pid': 1,
-                            'URL': url,
-                            'SourceIP': None,
-                            'TimeInterval': None,
-                            'Count': sum(data['timestamps'].values())
-                        })
-                        id += 1
-                    for timestamp, timestamp_count in data['timestamps'].items():
+                            if ip not in url_dict[timestamp]['ips']:
+                                url_dict[timestamp]['ips'][ip] = 1
+                            else:
+                                url_dict[timestamp]['ips'][ip] += 1
+                    total_count = sum(sum(data['ips'].values()) for data in url_dict.values())
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': url,
+                        'SourceIP': None,
+                        'TimeInterval': None,
+                        'Count': total_count
+                    })
+                    id += 1
+                    for timestamp, data in url_dict.items():
                         if 'TimeInterval' in dimensions:
                             report.append({
                                 'Id': id,
-                                'Pid': 2,
+                                'Pid': 1,
                                 'URL': None,
                                 'SourceIP': None,
                                 'TimeInterval': str(timestamp),
-                                'Count': timestamp_count
+                                'Count': sum(data['ips'].values())
                             })
                             id += 1
-        if (dimensions[0]=='SourceIP' and dimensions[1]=='TimeInterval'):
-            for ip, stats in self.statistics4.items():
-                report.append({
-                    'Id': id,
-                    'Pid': None,
-                    'URL': None,
-                    'SourceIP': ip,
-                    'TimeInterval': None,
-                    'Count': len(stats)
-                })
-                id += 1
-                timestamp_dict = {}
-                for stat in stats:
-                    timestamp, url = stat
-                    if timestamp not in timestamp_dict:
-                        timestamp_dict[timestamp] = {'count': 1, 'urls': {url: 1}}
-                    else:
-                        timestamp_dict[timestamp]['count'] += 1
-                        if url not in timestamp_dict[timestamp]['urls']:
-                            timestamp_dict[timestamp]['urls'][url] = 1
+                        for ip, ip_count in data['ips'].items():
+                            if 'SourceIP' in dimensions:
+                                report.append({
+                                    'Id': id,
+                                    'Pid': 2,
+                                    'URL': None,
+                                    'SourceIP': ip,
+                                    'TimeInterval': None,
+                                    'Count': ip_count
+                                })
+                                id += 1
+            if (dimensions[0]=='SourceIP' and dimensions[1]=='URL'):
+                for ip, stats in self.statistics3.items():
+                    ip_dict = {}
+                    for stat in stats:
+                        url, timestamp = stat
+                        if url not in ip_dict:
+                            ip_dict[url] = {'count': 1, 'timestamps': {timestamp: 1}}
                         else:
-                            timestamp_dict[timestamp]['urls'][url] += 1
-                for timestamp, data in timestamp_dict.items():
-                    if 'TimeInterval' in dimensions:
-                        report.append({
-                            'Id': id,
-                            'Pid': 1,
-                            'URL': None,
-                            'SourceIP': None,
-                            'TimeInterval': str(timestamp),
-                            'Count': data['count']
-                        })
-                        id += 1
-                    for url, url_count in data['urls'].items():
+                            if timestamp not in ip_dict[url]['timestamps']:
+                                ip_dict[url]['timestamps'][timestamp] = 1
+                            else:
+                                ip_dict[url]['timestamps'][timestamp] += 1
+                    total_count = sum(sum(data['timestamps'].values()) for data in ip_dict.values())
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': None,
+                        'SourceIP': ip,
+                        'TimeInterval': None,
+                        'Count': total_count
+                    })
+                    id += 1
+                    for url, data in ip_dict.items():
                         if 'URL' in dimensions:
                             report.append({
                                 'Id': id,
-                                'Pid': 2,
+                                'Pid': 1,
                                 'URL': url,
                                 'SourceIP': None,
                                 'TimeInterval': None,
-                                'Count': url_count
+                                'Count': sum(data['timestamps'].values())
                             })
                             id += 1
-        if (dimensions[0]=='TimeInterval' and dimensions[1]=='SourceIP'):
-            for timestamp, stats in self.statistics5.items():
-                report.append({
-                    'Id': id,
-                    'Pid': None,
-                    'URL': None,
-                    'SourceIP': None,
-                    'TimeInterval': str(timestamp),
-                    'Count': len(stats)
-                })
-                id += 1
-                ip_dict = {}
-                for stat in stats:
-                    ip, url = stat
-                    if ip not in ip_dict:
-                        ip_dict[ip] = {'count': 1, 'urls': {url: 1}}
-                    else:
-                        if url not in ip_dict[ip]['urls']:
-                            ip_dict[ip]['count'] += 1
-                            ip_dict[ip]['urls'][url] = 1
+                        for timestamp, timestamp_count in data['timestamps'].items():
+                            if 'TimeInterval' in dimensions:
+                                report.append({
+                                    'Id': id,
+                                    'Pid': 2,
+                                    'URL': None,
+                                    'SourceIP': None,
+                                    'TimeInterval': str(timestamp),
+                                    'Count': timestamp_count
+                                })
+                                id += 1
+            if (dimensions[0]=='SourceIP' and dimensions[1]=='TimeInterval'):
+                for ip, stats in self.statistics4.items():
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': None,
+                        'SourceIP': ip,
+                        'TimeInterval': None,
+                        'Count': len(stats)
+                    })
+                    id += 1
+                    timestamp_dict = {}
+                    for stat in stats:
+                        timestamp, url = stat
+                        if timestamp not in timestamp_dict:
+                            timestamp_dict[timestamp] = {'count': 1, 'urls': {url: 1}}
                         else:
-                            ip_dict[ip]['urls'][url] += 1
-                for ip, data in ip_dict.items():
-                    if 'SourceIP' in dimensions:
-                        report.append({
-                            'Id': id,
-                            'Pid': 1,
-                            'URL': None,
-                            'SourceIP': ip,
-                            'TimeInterval': None,
-                            'Count': sum(data['urls'].values())
-                        })
-                        id += 1
-                    for url, url_count in data['urls'].items():
-                        if 'URL' in dimensions:
+                            timestamp_dict[timestamp]['count'] += 1
+                            if url not in timestamp_dict[timestamp]['urls']:
+                                timestamp_dict[timestamp]['urls'][url] = 1
+                            else:
+                                timestamp_dict[timestamp]['urls'][url] += 1
+                    for timestamp, data in timestamp_dict.items():
+                        if 'TimeInterval' in dimensions:
                             report.append({
                                 'Id': id,
-                                'Pid': 2,
-                                'URL': url,
+                                'Pid': 1,
+                                'URL': None,
                                 'SourceIP': None,
-                                'TimeInterval': None,
-                                'Count': url_count
+                                'TimeInterval': str(timestamp),
+                                'Count': data['count']
                             })
                             id += 1
-        if (dimensions[0]=='TimeInterval' and dimensions[1]=='URL'):
-            for timestamp, stats in self.statistics6.items():
-                report.append({
-                    'Id': id,
-                    'Pid': None,
-                    'URL': None,
-                    'SourceIP': None,
-                    'TimeInterval': str(timestamp),
-                    'Count': len(stats)
-                })
-                id += 1
-                url_dict = {}
-                for stat in stats:
-                    url, ip = stat
-                    if url not in url_dict:
-                        url_dict[url] = {'count': 1, 'ips': {ip: 1}}
-                    else:
-                        if ip not in url_dict[url]['ips']:
-                            url_dict[url]['ips'][ip] = 1
+                        for url, url_count in data['urls'].items():
+                            if 'URL' in dimensions:
+                                report.append({
+                                    'Id': id,
+                                    'Pid': 2,
+                                    'URL': url,
+                                    'SourceIP': None,
+                                    'TimeInterval': None,
+                                    'Count': url_count
+                                })
+                                id += 1
+            if (dimensions[0]=='TimeInterval' and dimensions[1]=='SourceIP'):
+                for timestamp, stats in self.statistics5.items():
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': None,
+                        'SourceIP': None,
+                        'TimeInterval': str(timestamp),
+                        'Count': len(stats)
+                    })
+                    id += 1
+                    ip_dict = {}
+                    for stat in stats:
+                        ip, url = stat
+                        if ip not in ip_dict:
+                            ip_dict[ip] = {'count': 1, 'urls': {url: 1}}
                         else:
-                            url_dict[url]['ips'][ip] += 1
-                        url_dict[url]['count'] = sum(url_dict[url]['ips'].values())
-                for url, data in url_dict.items():
-                    if 'URL' in dimensions:
-                        report.append({
-                            'Id': id,
-                            'Pid': 1,
-                            'URL': url,
-                            'SourceIP': None,
-                            'TimeInterval': None,
-                            'Count': data['count']
-                        })
-                        id += 1
-                    for ip, ip_count in data['ips'].items():
+                            if url not in ip_dict[ip]['urls']:
+                                ip_dict[ip]['count'] += 1
+                                ip_dict[ip]['urls'][url] = 1
+                            else:
+                                ip_dict[ip]['urls'][url] += 1
+                    for ip, data in ip_dict.items():
                         if 'SourceIP' in dimensions:
                             report.append({
                                 'Id': id,
-                                'Pid': 2,
+                                'Pid': 1,
                                 'URL': None,
                                 'SourceIP': ip,
                                 'TimeInterval': None,
-                                'Count': ip_count
+                                'Count': sum(data['urls'].values())
                             })
                             id += 1
+                        for url, url_count in data['urls'].items():
+                            if 'URL' in dimensions:
+                                report.append({
+                                    'Id': id,
+                                    'Pid': 2,
+                                    'URL': url,
+                                    'SourceIP': None,
+                                    'TimeInterval': None,
+                                    'Count': url_count
+                                })
+                                id += 1
+            if (dimensions[0]=='TimeInterval' and dimensions[1]=='URL'):
+                for timestamp, stats in self.statistics6.items():
+                    report.append({
+                        'Id': id,
+                        'Pid': None,
+                        'URL': None,
+                        'SourceIP': None,
+                        'TimeInterval': str(timestamp),
+                        'Count': len(stats)
+                    })
+                    id += 1
+                    url_dict = {}
+                    for stat in stats:
+                        url, ip = stat
+                        if url not in url_dict:
+                            url_dict[url] = {'count': 1, 'ips': {ip: 1}}
+                        else:
+                            if ip not in url_dict[url]['ips']:
+                                url_dict[url]['ips'][ip] = 1
+                            else:
+                                url_dict[url]['ips'][ip] += 1
+                            url_dict[url]['count'] = sum(url_dict[url]['ips'].values())
+                    for url, data in url_dict.items():
+                        if 'URL' in dimensions:
+                            report.append({
+                                'Id': id,
+                                'Pid': 1,
+                                'URL': url,
+                                'SourceIP': None,
+                                'TimeInterval': None,
+                                'Count': data['count']
+                            })
+                            id += 1
+                        for ip, ip_count in data['ips'].items():
+                            if 'SourceIP' in dimensions:
+                                report.append({
+                                    'Id': id,
+                                    'Pid': 2,
+                                    'URL': None,
+                                    'SourceIP': ip,
+                                    'TimeInterval': None,
+                                    'Count': ip_count
+                                })
+                                id += 1
         # Форматирование и возврат отчета.
         formatted_report = self.format_report(report, dimensions)
         return formatted_report
