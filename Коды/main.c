@@ -71,7 +71,7 @@ DWORD WINAPI handle_client(LPVOID lpParam) {
         int temp; // Переменная, отвечающая за номер аргумента
         char* result = NULL;
         // Проверка количества аргументов
-        if (argc < 4 || argc > 7) {
+        if (argc < 4 || argc > 7 || argv[4] == NULL) {
             result = malloc(100);
             sprintf(result, "Error.\n");
             goto skip;
@@ -104,292 +104,292 @@ DWORD WINAPI handle_client(LPVOID lpParam) {
         // Обработка каждой команды
         if (filename != NULL && query != NULL) {
             FILE* file = fopen(filename, "r");
-        if (!file) {
-            FILE* file = fopen(filename, "w");
-        }
-        if (strcmp(argv[temp], "SPUSH") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
+            if (!file) {
+                FILE* file = fopen(filename, "w");
             }
-            Stack* stack = loadFromFileStack(filename, basename, &pos1, &pos2, &status);
-            if (stack == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "SPUSH") == 0) {
+                if (key == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                Stack* stack = loadFromFileStack(filename, basename, &pos1, &pos2, &status);
+                if (stack == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    SPUSH(stack, key);
-                    result = malloc(strlen(key) + 5);
-                    sprintf(result, "-> %s\n", key);
-                    if (status == 1) status = 0;
-                    fclose(file);
-                    saveToFileStack(stack, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        SPUSH(stack, key);
+                        result = malloc(strlen(key) + 5);
+                        sprintf(result, "-> %s\n", key);
+                        if (status == 1) status = 0;
+                        fclose(file);
+                        saveToFileStack(stack, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "SPOP") == 0) {
-            Stack* stack = loadFromFileStack(filename, basename, &pos1, &pos2, &status);
-            if (stack == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
-                    result = malloc(40);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+            if (strcmp(argv[temp], "SPOP") == 0) {
+                Stack* stack = loadFromFileStack(filename, basename, &pos1, &pos2, &status);
+                if (stack == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    char* element = SPOP(stack);
-                    result = malloc(strlen(element) + 5);
-                    sprintf(result, "-> %s\n", element);
-                    if (status == 2) status = 0;
-                    fclose(file);
-                    saveToFileStack(stack, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(40);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        char* element = SPOP(stack);
+                        result = malloc(strlen(element) + 5);
+                        sprintf(result, "-> %s\n", element);
+                        if (status == 2) status = 0;
+                        fclose(file);
+                        saveToFileStack(stack, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "SADD") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            Set* set = loadFromFileSet(filename, basename, &pos1, &pos2, &status);
-            if (set == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "SADD") == 0) {
+                if (key == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                Set* set = loadFromFileSet(filename, basename, &pos1, &pos2, &status);
+                if (set == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    SADD(set, key);
-                    result = malloc(strlen(key) + 5);
-                    sprintf(result, "-> %s\n", key);
-                    if (status == 1) status = 0;
-                    fclose(file);
-                    saveToFileSet(set, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        SADD(set, key);
+                        result = malloc(strlen(key) + 5);
+                        sprintf(result, "-> %s\n", key);
+                        if (status == 1) status = 0;
+                        fclose(file);
+                        saveToFileSet(set, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "SREM") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            Set* set = loadFromFileSet(filename, basename, &pos1, &pos2, &status);
-            if (set == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "SREM") == 0) {
+                if (key == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                Set* set = loadFromFileSet(filename, basename, &pos1, &pos2, &status);
+                if (set == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    SREM(set, key);
-                    result = malloc(strlen(key) + 5);
-                    sprintf(result, "-> %s\n", key);
-                    if (status == 2) status = 0;
-                    fclose(file);
-                    saveToFileSet(set, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        SREM(set, key);
+                        result = malloc(strlen(key) + 5);
+                        sprintf(result, "-> %s\n", key);
+                        if (status == 2) status = 0;
+                        fclose(file);
+                        saveToFileSet(set, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "SISMEMBER") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            Set* set = loadFromFileSet(filename, basename, &pos1, &pos2, &status);
-            if (set == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "SISMEMBER") == 0) {
+                if (key == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                Set* set = loadFromFileSet(filename, basename, &pos1, &pos2, &status);
+                if (set == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    result = malloc(100);
-                    if (SISMEMBER(set, key)) sprintf(result, "-> True\n");
-                    else sprintf(result, "-> False\n");
-                    fclose(file);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        result = malloc(100);
+                        if (SISMEMBER(set, key)) sprintf(result, "-> True\n");
+                        else sprintf(result, "-> False\n");
+                        fclose(file);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "QPUSH") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            Queue* queue = loadFromFileQueue(filename, basename, &pos1, &pos2, &status);
-            if (queue == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "QPUSH") == 0) {
+                if (key == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                Queue* queue = loadFromFileQueue(filename, basename, &pos1, &pos2, &status);
+                if (queue == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    QPUSH(queue, key);
-                    result = malloc(strlen(key) + 5);
-                    sprintf(result, "-> %s\n", key);
-                    if (status == 1) status = 0;
-                    fclose(file);
-                    saveToFileQueue(queue, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        QPUSH(queue, key);
+                        result = malloc(strlen(key) + 5);
+                        sprintf(result, "-> %s\n", key);
+                        if (status == 1) status = 0;
+                        fclose(file);
+                        saveToFileQueue(queue, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "QPOP") == 0) {
-            Queue* queue = loadFromFileQueue(filename, basename, &pos1, &pos2, &status);
-            if (queue == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "QPOP") == 0) {
+                Queue* queue = loadFromFileQueue(filename, basename, &pos1, &pos2, &status);
+                if (queue == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    char* element = QPOP(queue);
-                    result = malloc(strlen(element) + 5);
-                    sprintf(result, "-> %s\n", element);
-                    if (status == 2) status = 0;
-                    fclose(file);
-                    saveToFileQueue(queue, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        char* element = QPOP(queue);
+                        result = malloc(strlen(element) + 5);
+                        sprintf(result, "-> %s\n", element);
+                        if (status == 2) status = 0;
+                        fclose(file);
+                        saveToFileQueue(queue, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "HSET") == 0) {
-            if (key == NULL || item == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            HashTable* hashtable = loadFromFileTable(filename, basename, &pos1, &pos2, &status);
-            if (hashtable == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "HSET") == 0) {
+                if (key == NULL || item == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                HashTable* hashtable = loadFromFileTable(filename, basename, &pos1, &pos2, &status);
+                if (hashtable == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    HSET(hashtable, key, item);
-                    result = malloc(strlen(item) + strlen(key) + 20);
-                    sprintf(result, "-> %s %s\n", item, key);
-                    if (status == 1) status = 0;
-                    fclose(file);
-                    saveToFileTable(hashtable, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        HSET(hashtable, key, item);
+                        result = malloc(strlen(item) + strlen(key) + 20);
+                        sprintf(result, "-> %s %s\n", item, key);
+                        if (status == 1) status = 0;
+                        fclose(file);
+                        saveToFileTable(hashtable, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "HDEL") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            HashTable* hashtable = loadFromFileTable(filename, basename, &pos1, &pos2, &status);
-            if (hashtable == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error when opening a file!\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "HDEL") == 0) {
+                if (key == NULL) {
                     result = malloc(100);
-                    sprintf(result, "Such a database, alas, does not exist!\n");
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                HashTable* hashtable = loadFromFileTable(filename, basename, &pos1, &pos2, &status);
+                if (hashtable == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error when opening a file!\n");
                     fclose(file);
                 }
                 else {
-                    HDEL(hashtable, key);
-                    result = malloc(strlen(key) + 5);
-                    sprintf(result, "-> %s\n", key);
-                    if (status == 2) status = 0;
-                    fclose(file);
-                    saveToFileTable(hashtable, filename, basename, &pos1, &pos2, &status);
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Such a database, alas, does not exist!\n");
+                        fclose(file);
+                    }
+                    else {
+                        HDEL(hashtable, key);
+                        result = malloc(strlen(key) + 5);
+                        sprintf(result, "-> %s\n", key);
+                        if (status == 2) status = 0;
+                        fclose(file);
+                        saveToFileTable(hashtable, filename, basename, &pos1, &pos2, &status);
+                    }
                 }
             }
-        }
-        if (strcmp(argv[temp], "HGET") == 0) {
-            if (key == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                goto skip;
-            }
-            HashTable* hashtable = loadFromFileTable(filename, basename, &pos1, &pos2, &status);
-            if (hashtable == NULL) {
-                result = malloc(100);
-                sprintf(result, "Error.\n");
-                fclose(file);
-            }
-            else {
-                if (pos1 + pos2 == 0) {
+            if (strcmp(argv[temp], "HGET") == 0) {
+                if (key == NULL) {
+                    result = malloc(100);
+                    sprintf(result, "Error.\n");
+                    goto skip;
+                }
+                HashTable* hashtable = loadFromFileTable(filename, basename, &pos1, &pos2, &status);
+                if (hashtable == NULL) {
                     result = malloc(100);
                     sprintf(result, "Error.\n");
                     fclose(file);
                 }
                 else {
-                    if (HGET(hashtable, key) != NULL) {
-                        result = malloc(strlen(HGET(hashtable, key)) + 15);
-                        sprintf(result, "%s\n", HGET(hashtable, key));
+                    if (pos1 + pos2 == 0) {
+                        result = malloc(100);
+                        sprintf(result, "Error.\n");
+                        fclose(file);
                     }
                     else {
-                        result = malloc(100);
-                        sprintf(result, "-> False\n");
+                        if (HGET(hashtable, key) != NULL) {
+                            result = malloc(strlen(HGET(hashtable, key)) + 15);
+                            sprintf(result, "%s\n", HGET(hashtable, key));
+                        }
+                        else {
+                            result = malloc(100);
+                            sprintf(result, "-> False\n");
+                        }
+                        fclose(file);
                     }
-                    fclose(file);
                 }
             }
         }
-    }
-    else {
-        result = malloc(100);
-        sprintf(result, "Error.\n");
-    }
+        else {
+            result = malloc(100);
+            sprintf(result, "Error.\n");
+        }
     skip: {
-    if (result == NULL) {
-        result = malloc(100);
-        sprintf(result, "Error.\n");
-    }
-    int bytes_sent = send(client_socket, result, strlen(result), 0); // Отправка результата клиенту
-    }
+        if (result == NULL) {
+            result = malloc(100);
+            sprintf(result, "Error.\n");
+        }
+        int bytes_sent = send(client_socket, result, strlen(result), 0); // Отправка результата клиенту
+        }
     free(argv);
     free(result);
     }
